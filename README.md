@@ -110,90 +110,6 @@ HTTP Request
      MySQL
 ```
 
-## 📦 Entidades
-
-La aplicación utiliza las siguientes entidades:
-
-```text
-User
- │
- ├── Project
- │      │
- │      └── Task
- │            │
- │            ├── TaskComment
- │            │       └── User
- │            │
- │            └── TaskTag
- │                   └── Tag
-```
-
-### User
-
-Representa los usuarios de la aplicación.
-
-Principales campos:
-
-* `id`
-* `name`
-* `email`
-* `password_hash`
-* `is_active`
-* `created_at`
-* `updated_at`
-
-### Project
-
-Representa proyectos pertenecientes a usuarios.
-
-Relación:
-
-```text
-User 1 ─────── N Project
-```
-
-### Task
-
-Representa tareas asociadas a un proyecto.
-
-Relaciones:
-
-```text
-Project 1 ─────── N Task
-
-User 1 ────────── N Task
-```
-
-Un usuario puede tener múltiples tareas asignadas.
-
-### TaskComment
-
-Representa comentarios asociados a tareas.
-
-```text
-Task 1 ─────── N TaskComment
-
-User 1 ─────── N TaskComment
-```
-
-### Tag
-
-Representa etiquetas que pueden asociarse a tareas.
-
-La relación entre `Task` y `Tag` es muchos a muchos:
-
-```text
-Task N ─────── N Tag
-```
-
-utilizando la tabla intermedia:
-
-```text
-task_tags
-```
-
----
-
 # 🚀 Instalación
 
 ## Requisitos
@@ -293,33 +209,12 @@ Retroceder una migración:
 uv run alembic downgrade -1
 ```
 
-## Flujo recomendado
-
-Cuando modifiques los modelos:
-
-```text
-Modificar models.py
-       │
-       ▼
-alembic revision --autogenerate
-       │
-       ▼
-Revisar migration
-       │
-       ▼
-alembic upgrade head
-```
-
-Las migraciones deben revisarse manualmente antes de aplicarlas.
-
----
-
 # ▶️ Ejecutar la aplicación
 
 Puedes iniciar el servidor con:
 
 ```bash
-uv run uvicorn app.main:app --reload
+uv run fastapi dev
 ```
 
 La API estará disponible normalmente en:
@@ -437,66 +332,6 @@ La configuración relacionada con seguridad se encuentra en:
 ```text
 app/core/security.py
 ```
-
-La aplicación está preparada para incorporar posteriormente:
-
-* password hashing
-* autenticación
-* JWT
-* autorización
-* roles/permisos
-
----
-
-# 🧠 Objetivos de aprendizaje
-
-Este proyecto está diseñado para practicar:
-
-* Python
-* FastAPI
-* REST APIs
-* SQLModel
-* SQLAlchemy
-* MySQL
-* Alembic
-* ORM
-* relaciones entre entidades
-* Dependency Injection
-* Repository Pattern
-* Service Layer
-* validación de datos
-* manejo de errores
-* autenticación
-* testing
-* arquitectura backend
-
----
-
-# 📚 Próximos pasos
-
-Algunas funcionalidades que pueden incorporarse:
-
-* [ ] CRUD completo de usuarios
-* [ ] CRUD de proyectos
-* [ ] CRUD de tareas
-* [ ] CRUD de comentarios
-* [ ] CRUD de tags
-* [ ] Filtros y paginación
-* [ ] Ordenamiento
-* [ ] Manejo global de excepciones
-* [ ] Autenticación JWT
-* [ ] Password hashing
-* [ ] Roles y permisos
-* [ ] Tests unitarios
-* [ ] Tests de integración
-* [ ] Docker
-* [ ] Docker Compose
-* [ ] CI/CD
-* [ ] Logging
-* [ ] Health check
-* [ ] Rate limiting
-
----
 
 # 📄 License
 
