@@ -4,7 +4,7 @@ from enum import Enum
 from pydantic import BaseModel
 from app.core.config import settings
 from sqlmodel import Session, text
-# from app import models
+from app import models
 from app.users.router import router as users_router
 
 
@@ -29,30 +29,30 @@ app = FastAPI()
 app.include_router(users_router)
 
 
-@app.get("/")
-async def read_root():
-    # return {"Hello": "FastAPI"}
-    result = '';
-    with Session(engine) as session:
-        result = session.exec(text("SELECT 1"))
-        print(result.one())
+# @app.get("/")
+# async def read_root():
+#     # return {"Hello": "FastAPI"}
+#     result = '';
+#     with Session(engine) as session:
+#         result = session.exec(text("SELECT 1"))
+#         print(result.one())
 
-    return {
-        "app_name": settings.app_name,
-        "app_version": settings.app_version,
-        "db_url": settings.database_url,
-    }
+#     return {
+#         "app_name": settings.app_name,
+#         "app_version": settings.app_version,
+#         "db_url": settings.database_url,
+#     }
 
 
-@app.get("/models/{model_name}")
-async def get_model(model_name: ModelName):
-    if model_name is ModelName.alexnet:
-        return {"model_name": model_name, "message": "Deep Learning FTW!"}
+# @app.get("/models/{model_name}")
+# async def get_model(model_name: ModelName):
+#     if model_name is ModelName.alexnet:
+#         return {"model_name": model_name, "message": "Deep Learning FTW!"}
 
-    if model_name.value == "lenet":
-        return {"model_name": model_name, "message": "LeCNN all the images"}
+#     if model_name.value == "lenet":
+#         return {"model_name": model_name, "message": "LeCNN all the images"}
 
-    return {"model_name": model_name, "message": "Have some residuals"}
+#     return {"model_name": model_name, "message": "Have some residuals"}
 
 # @app.get("/files/{file_path:path}")
 # async def read_file(file_path: str):
