@@ -8,8 +8,8 @@ class UserService:
     def __init__(self, repository: UserRepository):
         self.repository = repository
         
-    def list_users(self, offset: int = 0, limit: int = 100) -> list[User]:
-        return self.repository.get_users(offset, limit)
+    def list_users(self, filters) -> list[User]:
+        return self.repository.get_users(filters)
 
     def find_user(self, id: int) -> User:
         return self.repository.get_user(id)  

@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import FastAPI, Query
+from fastapi import FastAPI
 from enum import Enum
 from pydantic import BaseModel
 from app.core.config import settings
@@ -27,7 +27,6 @@ class Item(BaseModel):
 app = FastAPI()
 
 app.include_router(users_router)
-
 
 # @app.get("/")
 # async def read_root():
