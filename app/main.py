@@ -1,12 +1,12 @@
 from typing import Annotated
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from enum import Enum
 from pydantic import BaseModel
 from app.core.config import settings
 from sqlmodel import Session, text
 from app import models
 from app.users.router import router as users_router
-
+from app.auth.router import router as auth_router
 
 from app.core.database import engine
 
@@ -26,7 +26,9 @@ class Item(BaseModel):
 
 app = FastAPI()
 
+app.include_router(auth_router)
 app.include_router(users_router)
+
 
 # @app.get("/")
 # async def read_root():

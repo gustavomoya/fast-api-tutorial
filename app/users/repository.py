@@ -23,4 +23,11 @@ class UserRepository:
         return list(self.session.exec(statement).all())
 
     def get_user(self, id : int) -> User:
-        return self.session.get(User, id)        
+        return self.session.get(User, id)       
+
+    def get_by_email(self, email: str) -> User | None:
+        statement = select(User).where(
+            User.email == email
+        )
+
+        return self.session.exec(statement).first() 

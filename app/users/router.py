@@ -7,6 +7,8 @@ from app.users.schemas import UserResponse, UserFilterParams
 from app.users.models import User
 from app.users.service import UserService
 from app.users.dependencies import get_user_service
+from app.auth.dependencies import get_current_active_user
+from app.core.security import Security
 
 router = APIRouter(
     prefix="/users",
@@ -14,11 +16,18 @@ router = APIRouter(
 )
 
 @router.get( "/",response_model=list[UserResponse],)
-def get_users(filters: Annotated[UserFilterParams, Query()], service: UserService = Depends(get_user_service)):
+def get_users(filters: Annotated[UserFilterParams, Query()], service: UserService = Depends(get_user_service)):    
     return service.list_users(filters)
 
+@router.get("/me")
+def read_users_me(
+current_user: Annotated[User, Depends(get_current_active_user),],) -> User:
+    return current_user
+
 @router.get("/{id}")
-def get_user(id: int, service: UserService = Depends(get_user_service)):
+def get_user(id: int, 
+             service: UserService = Depends(get_user_service,),
+             current_user: Annotated[User,Depends(get_current_active_user),] = None,):
     user =  service.find_user(id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
