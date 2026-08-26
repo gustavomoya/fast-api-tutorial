@@ -1,9 +1,12 @@
+import logging
+
 from sqlmodel import Session
 
 from app.users.models import User
 from app.users.repository import UserRepository
 from app.core.security import Security
 
+logger = logging.getLogger(__name__)
 
 class UserService:
     def __init__(self, repository: UserRepository

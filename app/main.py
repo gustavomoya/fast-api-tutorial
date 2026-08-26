@@ -1,95 +1,66 @@
+import logging
+import time
+
 from typing import Annotated
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request
+from fastapi.responses import JSONResponse
+from app.core.logging import configure_logging
+from app.core.config import settings
 from enum import Enum
 from pydantic import BaseModel
-from app.core.config import settings
-from sqlmodel import Session, text
 from app import models
 from app.users.router import router as users_router
 from app.auth.router import router as auth_router
 
-from app.core.database import engine
 
+configure_logging()
 
-class ModelName(str, Enum):
-    alexnet = "alexnet"
-    resnet = "resnet"
-    lenet = "lenet"
-
-fake_items_db = [{"item_name": "Foo"}, {"item_name": "Bar"}, {"item_name": "Baz"}]
-
-class Item(BaseModel):
-    name: str
-    description: str | None = None
-    price: float
-    tax: float | None = None
-
-app = FastAPI()
+app = FastAPI(
+     title=settings.app_name,
+     version=settings.app_version,
+)
 
 app.include_router(auth_router)
 app.include_router(users_router)
 
+logger = logging.getLogger(__name__)
 
-# @app.get("/")
-# async def read_root():
-#     # return {"Hello": "FastAPI"}
-#     result = '';
-#     with Session(engine) as session:
-#         result = session.exec(text("SELECT 1"))
-#         print(result.one())
+@app.exception_handler(Exception)
+async def global_exception_handler(
+    request: Request,
+    exc: Exception,
+):
+    logger.exception(
+        "Unhandled exception: %s %s",
+        request.method,
+        request.url.path,
+    )
 
-#     return {
-#         "app_name": settings.app_name,
-#         "app_version": settings.app_version,
-#         "db_url": settings.database_url,
-#     }
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": "Internal server error"
+        },
+    )
+    
 
+@app.middleware("http")
+async def log_requests(
+    request: Request,
+    call_next,
+):
+    start_time = time.perf_counter()
 
-# @app.get("/models/{model_name}")
-# async def get_model(model_name: ModelName):
-#     if model_name is ModelName.alexnet:
-#         return {"model_name": model_name, "message": "Deep Learning FTW!"}
+    response = await call_next(request) 
 
-#     if model_name.value == "lenet":
-#         return {"model_name": model_name, "message": "LeCNN all the images"}
+    duration = time.perf_counter() - start_time
 
-#     return {"model_name": model_name, "message": "Have some residuals"}
+    logger.info(
+        "%s %s -> %s (%.3fs)",
+        request.method,
+        request.url.path,
+        response.status_code,
+        duration,
+    )
 
-# @app.get("/files/{file_path:path}")
-# async def read_file(file_path: str):
-#     return {"file_path": file_path}
-
-# @app.get("/items/")
-# async def read_item(skip: int = 0, limit: int = 10):
-#     return fake_items_db[skip : skip + limit]
-
-# @app.get("/items/")
-# async def read_items(q: Annotated[str | None, Query(min_length=3, max_length=50)] = None):
-#     results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
-#     if q:
-#         results.update({"q": q})
-#     return results
-
-
-# @app.get("/items/{item_id}")
-# async def read_item(item_id: str, q: str | None = None, short: bool = False):
-#     item = {"item_id": item_id}
-#     if q:
-#         item.update({"q": q})
-#     if not short:
-#         item.update(
-#             {"description": "This is an amazing item that has a long description"}
-#         )
-#     return item
-
-# @app.post("/items/")
-# async def create_item(item: Item):
-#     item_dict = item.model_dump()
-#     if item.tax is not None:
-#         price_with_tax = item.price + item.tax
-#         item_dict.update({"price_with_tax": price_with_tax})
-#     return item_dict
-
-# @app.put("/items/{item_id}")
-# async def update_item(item_id: int, item: Item):
-#     return {"item_id": item_id, **item.model_dump()}
+    return response
