@@ -12,6 +12,7 @@ from app import models
 from app.users.router import router as users_router
 from app.auth.router import router as auth_router
 from app.projects.router import router as projects_router
+# import httpx
 
 
 configure_logging()
@@ -67,3 +68,27 @@ async def log_requests(
 
     return response
 
+# @app.get("/external")
+# async def root():
+#     # url = "http://127.0.0.1:3001/api/blogs"
+#     url = "https://jsonplaceholder.typicode.com/posts"
+
+#     try:
+#         async with httpx.AsyncClient() as client:
+#             response = await client.get(url)
+
+#         # response.raise_for_status()
+
+#         return response.json()
+
+#     except httpx.HTTPStatusError as e:
+#         raise HTTPException(
+#             status_code=e.response.status_code,
+#             detail="La API de blogs respondió con un error"
+#         )
+
+#     except httpx.RequestError as e:
+#         raise HTTPException(
+#             status_code=500,
+#             detail=f"No se pudo conectar con la API de blogs: {str(e)}"
+#         )
