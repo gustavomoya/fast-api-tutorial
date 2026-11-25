@@ -94,6 +94,6 @@ class Task(SQLModel, table=True):
         back_populates="tasks",
     )
 
-    assignee: "User | None" = Relationship(
+    assignee: "User" = Relationship(
         back_populates="assigned_tasks",
     )

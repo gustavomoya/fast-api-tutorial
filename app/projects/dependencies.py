@@ -8,13 +8,17 @@ from app.projects.service import ProjectService
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
+
 def get_project_repository(
-    session:SessionDep,
+    session: SessionDep,
 ) -> ProjectRepository:
     return ProjectRepository(session)
 
 
 def get_project_service(
-    repository: ProjectRepository = Depends(get_project_repository),
+    repository: Annotated[
+        ProjectRepository,
+        Depends(get_project_repository),
+    ],
 ) -> ProjectService:
     return ProjectService(repository)
