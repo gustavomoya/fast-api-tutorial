@@ -121,7 +121,7 @@ class ProjectRepository:
         project = self.session.exec(statement).first()
 
         if project is None:
-            return None
+            return False
 
         self.session.delete(project)
         self.session.commit()
@@ -132,7 +132,7 @@ class ProjectRepository:
         self,
         project_id: int,
         owner_id: int,
-    ):
+    )-> Project | None:
         """Fetch a project by ID ensuring it belongs to the given owner."""
         statement = (
             select(Project)
