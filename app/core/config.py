@@ -5,6 +5,7 @@ class Settings(BaseSettings):
     app_name: str = "Task Management API"
     app_version: str = "1.0.0"
     database_url: str
+    test_database_url: str | None = None
     debug: bool = False
     secret_key: str
     algorithm: str = "HS256"
