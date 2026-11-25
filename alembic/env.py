@@ -7,6 +7,8 @@ from alembic import context
 
 from sqlmodel import SQLModel
 
+from app.core.config import settings
+
 # from app.core.config import settings
 # from app.users.models import User
 # from app.projects.models import Project
