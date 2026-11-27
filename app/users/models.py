@@ -7,8 +7,8 @@ from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from app.projects.models import Project
+    from app.projects.member_model import ProjectMember
     from app.tasks.models import Task
-
 
 
 class User(SQLModel, table=True):
@@ -43,14 +43,16 @@ class User(SQLModel, table=True):
         sa_type=TIMESTAMP,
         nullable=False,
         sa_column_kwargs={
-            "server_default": text(
-                "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
-            ),
+            "server_default": text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"),
         },
     )
 
     projects: list["Project"] = Relationship(
         back_populates="owner",
+    )
+
+    project_memberships: list["ProjectMember"] = Relationship(
+        back_populates="user",
     )
 
     assigned_tasks: list["Task"] = Relationship(
