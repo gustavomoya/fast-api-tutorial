@@ -35,16 +35,6 @@ class ProjectRepository:
 
         return list(self.session.exec(statement).all())
 
-    def get_project(self, project_id: int) -> Project | None:
-        """Return a project by ID with its owner loaded, or None."""
-        statement = (
-            select(Project)
-            .options(joinedload(Project.owner))
-            .where(Project.id == project_id)
-        )
-
-        return self.session.exec(statement).first()
-
     def get_projects_by_user(self, user_id: int) -> list[Project]:
         """Return up to 100 projects owned by a user."""
         statement = (
@@ -56,6 +46,28 @@ class ProjectRepository:
         )
 
         return list(self.session.exec(statement).all())
+
+    def get_project(self, project_id: int) -> Project | None:
+        """Return a project by ID with its owner loaded, or None."""
+        statement = (
+            select(Project)
+            .options(joinedload(Project.owner))
+            .where(Project.id == project_id)
+        )
+
+        return self.session.exec(statement).first()
+
+    def get_project_by_id_and_owner(
+        self,
+        project_id: int,
+        owner_id: int,
+    ) -> Project | None:
+
+        statement = select(Project).where(
+            Project.id == project_id,
+            Project.owner_id == owner_id,
+        )
+        return self.session.exec(statement).first()
 
     def create_project(
         self,
@@ -105,19 +117,19 @@ class ProjectRepository:
         update_data = project_data.model_dump()
 
         return self._apply_update(project, update_data)
-    
+
     def delete_project(
         self,
         project_id: int,
         owner_id: int,
     ) -> bool:
         """Delete a project."""
-        
+
         statement = select(Project).where(
             Project.id == project_id,
             Project.owner_id == owner_id,
         )
-        
+
         project = self.session.exec(statement).first()
 
         if project is None:
@@ -132,7 +144,7 @@ class ProjectRepository:
         self,
         project_id: int,
         owner_id: int,
-    )-> Project | None:
+    ) -> Project | None:
         """Fetch a project by ID ensuring it belongs to the given owner."""
         statement = (
             select(Project)

@@ -12,6 +12,7 @@ from app import models
 from app.users.router import router as users_router
 from app.auth.router import router as auth_router
 from app.projects.router import router as projects_router
+from app.tasks.router import router as tasks_router
 # import httpx
 
 
@@ -25,6 +26,7 @@ app = FastAPI(
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(projects_router)
+app.include_router(tasks_router)
 
 logger = logging.getLogger(__name__)
 
