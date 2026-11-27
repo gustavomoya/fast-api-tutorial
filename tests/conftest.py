@@ -8,6 +8,8 @@ from sqlmodel import Session, SQLModel
 from app.core.config import settings
 from app.core.database import get_session
 from app.main import app
+from app.auth.dependencies import get_current_active_user
+from app.users.models import User
 
 
 @pytest.fixture(scope="session")
@@ -58,3 +60,25 @@ def client(db_session: Session):
         yield test_client
 
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def authenticated_client(
+    client: TestClient,
+    db_session: Session,
+):
+    user = User(
+        name="Test User",
+        email="router-test@example.com",
+        password_hash="fake-password-hash",
+    )
+
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+
+    app.dependency_overrides[get_current_active_user] = lambda: user
+
+    yield client
+
+    app.dependency_overrides.pop(get_current_active_user, None)

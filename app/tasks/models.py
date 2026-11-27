@@ -1,4 +1,3 @@
-
 from datetime import date, datetime
 from enum import Enum
 from typing import TYPE_CHECKING
@@ -44,6 +43,7 @@ class Task(SQLModel, table=True):
         Index("idx_tasks_status", "status"),
         Index("idx_tasks_priority", "priority"),
         Index("idx_tasks_due_date", "due_date"),
+        Index("idx_tasks_created_by", "created_by"),
     )
 
     id: int | None = Field(
@@ -60,6 +60,14 @@ class Task(SQLModel, table=True):
                 name="fk_tasks_project",
                 ondelete="CASCADE",
             ),
+            nullable=False,
+        ),
+    )
+
+    created_by: int = Field(
+        sa_column=Column(
+            BIGINT(unsigned=True),
+            ForeignKey("users.id", name="fk_tasks_created_by"),
             nullable=False,
         ),
     )
@@ -89,9 +97,7 @@ class Task(SQLModel, table=True):
         max_length=20,
         sa_type=SAEnum(
             TaskStatus,
-            values_callable=lambda enum_cls: [
-                member.value for member in enum_cls
-            ],
+            values_callable=lambda enum_cls: [member.value for member in enum_cls],
             native_enum=True,
         ),
     )
@@ -101,9 +107,7 @@ class Task(SQLModel, table=True):
         max_length=20,
         sa_type=SAEnum(
             TaskPriority,
-            values_callable=lambda enum_cls: [
-                member.value for member in enum_cls
-            ],
+            values_callable=lambda enum_cls: [member.value for member in enum_cls],
             native_enum=True,
         ),
     )
@@ -122,9 +126,7 @@ class Task(SQLModel, table=True):
         sa_type=TIMESTAMP,
         nullable=False,
         sa_column_kwargs={
-            "server_default": text(
-                "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
-            ),
+            "server_default": text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"),
         },
     )
 
@@ -134,4 +136,10 @@ class Task(SQLModel, table=True):
 
     assignee: "User" = Relationship(
         back_populates="assigned_tasks",
+        sa_relationship_kwargs={"foreign_keys": "[Task.assigned_to]"},
+    )
+
+    creator: "User" = Relationship(
+        back_populates="created_tasks",
+        sa_relationship_kwargs={"foreign_keys": "[Task.created_by]"},
     )

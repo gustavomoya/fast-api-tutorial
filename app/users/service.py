@@ -18,5 +18,5 @@ class UserService:
     def list_users(self, filters) -> list[User]:
         return self.repository.get_users(filters)
 
-    def find_user(self, id: int) -> User:
+    def find_user(self, id: int) -> User| None:
         return self.repository.get_user(id)  

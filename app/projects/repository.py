@@ -2,8 +2,10 @@ from typing import Any
 
 from sqlmodel import Session, select
 from sqlalchemy.orm import joinedload
+from sqlalchemy import exists, or_
 
 from app.projects.models import Project
+from app.projects.member_model import ProjectMember
 from app.projects.schemas import (
     ProjectFilterParams,
     ProjectCreate,
@@ -18,7 +20,7 @@ class ProjectRepository:
         """Initialize the repository with a database session."""
         self.session = session
 
-    def get_projects(self, filters: ProjectFilterParams) -> list[Project]:
+    def get_all_projects(self, filters: ProjectFilterParams) -> list[Project]:
         """Return the projects matching the filters, with pagination."""
         statement = select(Project).options(joinedload(Project.owner))
 
@@ -53,6 +55,68 @@ class ProjectRepository:
             select(Project)
             .options(joinedload(Project.owner))
             .where(Project.id == project_id)
+        )
+
+        return self.session.exec(statement).first()
+
+    def get_projects(
+        self,
+        filters: ProjectFilterParams,
+        user_id: int,
+    ) -> list[Project]:
+        """Return projects owned by or accessible to a user."""
+
+        membership_exists = exists().where(
+            ProjectMember.project_id == Project.id,
+            ProjectMember.user_id == user_id,
+        )
+
+        statement = (
+            select(Project)
+            .options(joinedload(Project.owner))
+            .where(
+                or_(
+                    Project.owner_id == user_id,
+                    membership_exists,
+                )
+            )
+        )
+
+        if filters.name is not None:
+            statement = statement.where(Project.name == filters.name)
+
+        if filters.created_at is not None:
+            statement = statement.where(Project.created_at == filters.created_at)
+
+        if filters.updated_at is not None:
+            statement = statement.where(Project.updated_at == filters.updated_at)
+
+        statement = statement.offset(filters.offset).limit(filters.limit)
+
+        return list(self.session.exec(statement).all())
+
+    def get_project_accessible_to_user(
+        self,
+        project_id: int,
+        user_id: int,
+    ) -> Project | None:
+        """Return a project if the user owns it or is a member."""
+
+        membership_exists = exists().where(
+            ProjectMember.project_id == Project.id,
+            ProjectMember.user_id == user_id,
+        )
+
+        statement = (
+            select(Project)
+            .options(joinedload(Project.owner))
+            .where(
+                Project.id == project_id,
+                or_(
+                    Project.owner_id == user_id,
+                    membership_exists,
+                ),
+            )
         )
 
         return self.session.exec(statement).first()

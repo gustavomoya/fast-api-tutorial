@@ -19,7 +19,7 @@ class ProjectService:
     def __init__(self, repository: ProjectRepository):
         self.repository = repository
 
-    def get_projects(self, filters: ProjectFilterParams) -> list[Project]:
+    def get_all_projects(self, filters: ProjectFilterParams) -> list[Project]:
         return self.repository.get_projects(filters)
 
     def get_projects_by_user(self, user_id: int) -> list[Project]:
@@ -36,6 +36,26 @@ class ProjectService:
         return self.repository.get_project_by_id_and_owner(
             project_id,
             owner_id,
+        )
+
+    def get_projects(
+        self,
+        filters: ProjectFilterParams,
+        user_id: int,
+    ) -> list[Project]:
+        return self.repository.get_projects(
+            filters,
+            user_id,
+        )
+
+    def get_project_accessible_to_user(
+        self,
+        project_id: int,
+        user_id: int,
+    ) -> Project | None:
+        return self.repository.get_project_accessible_to_user(
+            project_id,
+            user_id,
         )
 
     def create_project(

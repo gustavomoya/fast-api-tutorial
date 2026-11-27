@@ -13,6 +13,7 @@ from app.users.router import router as users_router
 from app.auth.router import router as auth_router
 from app.projects.router import router as projects_router
 from app.tasks.router import router as tasks_router
+from app.projects.member_router import router as project_member_router
 # import httpx
 
 
@@ -27,6 +28,7 @@ app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(projects_router)
 app.include_router(tasks_router)
+app.include_router(project_member_router)
 
 logger = logging.getLogger(__name__)
 

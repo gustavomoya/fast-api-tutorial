@@ -25,17 +25,31 @@ router = APIRouter(
 )
 def get_projects(
     filters: Annotated[ProjectFilterParams, Query()],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     service: ProjectService = Depends(get_project_service),
 ):
-    return service.get_projects(filters)
-
+    return service.get_projects(
+        filters,
+        current_user.id,
+    )
+    
 
 @router.get("/{id}", response_model=ProjectResponse)
-def get_project(id: int, service: ProjectService = Depends(get_project_service)):
-    project = service.get_project(id)
+def get_project(
+    id: int,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    service: ProjectService = Depends(get_project_service),
+):
+    project = service.get_project_accessible_to_user(
+        id,
+        current_user.id,
+    )
 
     if not project:
-        raise HTTPException(status_code=404, detail="Project not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found",
+        )
 
     return project
 
@@ -75,6 +89,7 @@ def patch_project(
 
     return project
 
+
 @router.put("/{id}", response_model=ProjectResponse)
 def update_project(
     id: int,
@@ -94,7 +109,11 @@ def update_project(
 
     return project
 
-@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT,)
+
+@router.delete(
+    "/{id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
 def delete_project(
     id: int,
     current_user: Annotated[User, Depends(get_current_active_user)],

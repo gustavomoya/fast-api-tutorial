@@ -57,4 +57,10 @@ class User(SQLModel, table=True):
 
     assigned_tasks: list["Task"] = Relationship(
         back_populates="assignee",
+        sa_relationship_kwargs={"foreign_keys": "[Task.assigned_to]"},
+    )
+
+    created_tasks: list["Task"] = Relationship(
+        back_populates="creator",
+        sa_relationship_kwargs={"foreign_keys": "[Task.created_by]"},
     )

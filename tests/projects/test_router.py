@@ -8,28 +8,6 @@ from app.auth.dependencies import get_current_active_user
 from app.users.models import User
 
 
-@pytest.fixture
-def authenticated_client(
-    client: TestClient,
-    db_session: Session,
-):
-    user = User(
-        name="Test User",
-        email="router-test@example.com",
-        password_hash="fake-password-hash",
-    )
-
-    db_session.add(user)
-    db_session.commit()
-    db_session.refresh(user)
-
-    app.dependency_overrides[get_current_active_user] = lambda: user
-
-    yield client
-
-    app.dependency_overrides.pop(get_current_active_user, None)
-
-
 def test_get_projects(client: TestClient):
     response = client.get("/projects/")
 
